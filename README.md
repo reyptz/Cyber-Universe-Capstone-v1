@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL%20v3-yellow.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Security-ISO%2027001-red.svg)](https://www.iso.org/isoiec-27001-information-security.html)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Enabled-purple.svg)](https://www.devsecops.org)
 [![Crypto](https://img.shields.io/badge/Crypto-AES%20%7C%20RSA%20%7C%20ECC-orange.svg)](https://cryptography.io)
@@ -145,7 +145,6 @@ Ce projet est sous licence **AGPL v3**. Voir le fichier [LICENSE](LICENSE) pour 
 ### 🏢 Équipe de Développement
 **Ghost Cyber Universe Team**
 - 🎓 Projet Capstone en Cybersécurité
-- 🏫 Institution : [Votre Institution]
 - 📅 Année : 2025
 
 ### 📞 Moyens de Contact
