@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-ghost me-2"></i>
+                Ghost Cyber Universe
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/generate">Générer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security">Sécurité</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">À Propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/docs">API Docs</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-key me-3"></i>
+                        Générateur de Clés
+                    </h1>
+                    <p class="lead text-muted">
+                        Générez des clés cryptographiques sécurisées en quelques clics
+                    </p>
+                </div>
+
+                <!-- Formulaire de Génération -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            Configuration de la Clé
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="keyGenerationForm">
+                            <!-- Type de Clé -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="keyType" class="form-label fw-bold">
+                                        <i class="fas fa-tag me-2"></i>Type de Clé
+                                    </label>
+                                    <select class="form-select" id="keyType" name="key_type" required>
+                                        <option value="">Sélectionnez un type...</option>
+                                        <option value="symmetric">Clés Symétriques (AES, ChaCha20)</option>
+                                        <option value="rsa">RSA (Asymétrique)</option>
+                                        <option value="ecc">ECC (Courbes Elliptiques)</option>
+                                        <option value="ed25519">Ed25519 (Signatures)</option>
+                                        <option value="x25519">X25519 (Échange de clés)</option>
+                                        <option value="ssh">Clés SSH</option>
+                                        <option value="tls_cert">Certificats TLS</option>
+                                        <option value="bip39">BIP39 (Crypto-monnaie)</option>
+                                        <option value="jwt">JWT/API Tokens</option>
+                                        <option value="hmac">HMAC</option>
+                                        <option value="totp">TOTP/OTP</option>
+                                        <option value="kdf">KDF (Key Derivation)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="algorithm" class="form-label fw-bold">
+                                        <i class="fas fa-cogs me-2"></i>Algorithme
+                                    </label>
+                                    <select class="form-select" id="algorithm" name="algorithm" required>
+                                        <option value="AES-256">AES-256</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Paramètres Spécifiques -->
+                            <div class="row mb-4" id="specificParams">
+                                <!-- RSA -->
+                                <div class="col-md-6" id="rsaParams" style="display: none;">
+                                    <label for="rsaKeySize" class="form-label">Taille RSA</label>
+                                    <select class="form-select" id="rsaKeySize" name="rsa_key_size">
+                                        <option value="2048">RSA-2048 (Recommandé)</option>
+                                        <option value="3072">RSA-3072 (Haute sécurité)</option>
+                                        <option value="4096">RSA-4096 (Maximum)</option>
+                                    </select>
+                                </div>
+
+                                <!-- ECC -->
+                                <div class="col-md-6" id="eccParams" style="display: none;">
+                                    <label for="curve" class="form-label">Courbe Elliptique</label>
+                                    <select class="form-select" id="curve" name="curve">
+                                        <option value="secp256r1">secp256r1 (P-256)</option>
+                                        <option value="secp384r1">secp384r1 (P-384)</option>
+                                        <option value="secp521r1">secp521r1 (P-521)</option>
+                                        <option value="secp256k1">secp256k1 (Bitcoin)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Taille de clé générique -->
+                                <div class="col-md-6" id="genericKeySize" style="display: none;">
+                                    <label for="keySize" class="form-label">Taille de Clé (bits)</label>
+                                    <select class="form-select" id="keySize" name="key_size">
+                                        <option value="128">128 bits</option>
+                                        <option value="192">192 bits</option>
+                                        <option value="256">256 bits (Recommandé)</option>
+                                        <option value="512">512 bits</option>
+                                    </select>
+                                </div>
+
+                                <!-- BIP39 -->
+                                <div class="col-md-6" id="bip39Params" style="display: none;">
+                                    <label for="bip39Size" class="form-label">Entropie</label>
+                                    <select class="form-select" id="bip39Size" name="key_size">
+                                        <option value="128">128 bits (12 mots)</option>
+                                        <option value="160">160 bits (15 mots)</option>
+                                        <option value="192">192 bits (18 mots)</option>
+                                        <option value="224">224 bits (21 mots)</option>
+                                        <option value="256">256 bits (24 mots)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Format de Sortie -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="outputFormat" class="form-label fw-bold">
+                                        <i class="fas fa-download me-2"></i>Format de Sortie
+                                    </label>
+                                    <select class="form-select" id="outputFormat" name="output_format" required>
+                                        <option value="pem">PEM (Recommandé)</option>
+                                        <option value="der">DER (Binaire)</option>
+                                        <option value="pkcs8">PKCS#8</option>
+                                        <option value="pkcs12">PKCS#12/PFX</option>
+                                        <option value="jwk">JWK (JSON Web Key)</option>
+                                        <option value="base64">Base64</option>
+                                        <option value="hex">Hexadécimal</option>
+                                        <option value="raw">Raw/Binaire</option>
+                                        <option value="bip39_mnemonic">BIP39 Mnemonic</option>
+                                        <option value="openssh">OpenSSH</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validityDays" class="form-label fw-bold">
+                                        <i class="fas fa-calendar me-2"></i>Validité (jours)
+                                    </label>
+                                    <input type="number" class="form-control" id="validityDays" name="validity_days" value="365" min="1" max="3650">
+                                </div>
+                            </div>
+
+                            <!-- Protection par Mot de Passe -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="passwordProtected" name="password_protected" checked>
+                                        <label class="form-check-label fw-bold" for="passwordProtected">
+                                            <i class="fas fa-lock me-2"></i>Protéger la clé privée avec un mot de passe
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4" id="passwordSection">
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label fw-bold">
+                                        <i class="fas fa-key me-2"></i>Mot de Passe
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Mot de passe fort">
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        <small id="passwordStrength" class="text-muted"></small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-magic me-2"></i>Générateur
+                                    </label>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-primary" id="generatePassword">
+                                            <i class="fas fa-random me-2"></i>Générer
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="validatePassword">
+                                            <i class="fas fa-check me-2"></i>Valider
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations Certificat (pour TLS) -->
+                            <div class="row mb-4" id="certificateInfo" style="display: none;">
+                                <div class="col-md-6">
+                                    <label for="commonName" class="form-label fw-bold">
+                                        <i class="fas fa-certificate me-2"></i>Nom Commun (CN)
+                                    </label>
+                                    <input type="text" class="form-control" id="commonName" name="common_name" value="Ghost Cyber Universe" placeholder="example.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="organization" class="form-label fw-bold">
+                                        <i class="fas fa-building me-2"></i>Organisation
+                                    </label>
+                                    <input type="text" class="form-control" id="organization" name="organization" value="Ghost Cyber Universe">
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label for="country" class="form-label fw-bold">
+                                        <i class="fas fa-flag me-2"></i>Pays
+                                    </label>
+                                    <input type="text" class="form-control" id="country" name="country" value="FR" maxlength="2">
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label for="email" class="form-label fw-bold">
+                                        <i class="fas fa-envelope me-2"></i>Email (optionnel)
+                                    </label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="admin@example.com">
+                                </div>
+                            </div>
+
+                            <!-- Boutons d'Action -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="resetForm">
+                                    <i class="fas fa-undo me-2"></i>Réinitialiser
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="generateButton">
+                                    <i class="fas fa-magic me-2"></i>Générer la Clé
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Résultats -->
+                <div class="card shadow-lg border-0 mt-4" id="resultsCard" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Clé Générée avec Succès
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="resultsContent">
+                            <!-- Contenu dynamique -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avertissements de Sécurité -->
+                <div class="alert alert-warning mt-4" id="securityWarnings" style="display: none;">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Avertissements de Sécurité</h6>
+                    <ul id="warningsList" class="mb-0">
+                        <!-- Contenu dynamique -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5><i class="fas fa-ghost me-2"></i>Ghost Cyber Universe</h5>
+                    <p class="text-muted">Générateur de clés cryptographiques sécurisé</p>
+                </div>
+                <div class="col-lg-6 text-lg-end">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Sécurisé • Conforme • Open Source
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/generate.js"></script>
+</body>
+</html>

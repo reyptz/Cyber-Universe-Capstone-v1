@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-ghost me-2"></i>
+                Ghost Cyber Universe
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/generate">Générer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/security">Sécurité</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">À Propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/docs">API Docs</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        Sécurité & Bonnes Pratiques
+                    </h1>
+                    <p class="lead text-muted">
+                        Guide complet des bonnes pratiques de sécurité pour la génération et la gestion de clés cryptographiques
+                    </p>
+                </div>
+
+                <!-- Bonnes Pratiques -->
+                <div class="row g-4 mb-5">
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <h5 class="card-title">Protection des Clés Privées</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Chiffrement avec mots de passe forts</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Stockage dans un HSM (Hardware Security Module)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Jamais de stockage en clair</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Rotation régulière des clés</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <h5 class="card-title">Génération Sécurisée</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>CSPRNG (Cryptographically Secure PRNG)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Entropie suffisante</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Validation des paramètres</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Tests de qualité</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h5 class="card-title">Audit & Monitoring</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Logs de toutes les opérations</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Traçabilité complète</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Détection d'anomalies</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Rapports de sécurité</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h5 class="card-title">Protection contre les Abus</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Rate limiting</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Validation des entrées</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Protection CSRF</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>HTTPS obligatoire</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommandations de Sécurité -->
+                <div class="card shadow-lg border-0 mb-5">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-check me-2"></i>
+                            Recommandations de Sécurité
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="securityRecommendations">
+                            <!-- Contenu chargé dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avertissements par Type de Clé -->
+                <div class="card shadow-lg border-0 mb-5">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Avertissements de Sécurité par Type de Clé
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-danger">🔐 Clés Privées (RSA, ECC, Ed25519)</h6>
+                                <ul class="small">
+                                    <li>Ne jamais partager vos clés privées</li>
+                                    <li>Utilisez des mots de passe forts</li>
+                                    <li>Stockez dans un endroit sûr</li>
+                                    <li>Révocation immédiate si compromise</li>
+                                </ul>
+
+                                <h6 class="text-warning">💰 BIP39 (Crypto-monnaie)</h6>
+                                <ul class="small">
+                                    <li><strong>GARDEZ CE MNÉMONIQUE SECRET</strong></li>
+                                    <li>Ne le tapez jamais sur un ordinateur connecté</li>
+                                    <li>Stockez hors-ligne uniquement</li>
+                                    <li>Perdre le mnémonique = perte définitive des fonds</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info">🔒 Certificats TLS</h6>
+                                <ul class="small">
+                                    <li>Vérifiez la validité avant utilisation</li>
+                                    <li>Configurez la rotation automatique</li>
+                                    <li>Surveillez l'expiration</li>
+                                    <li>Utilisez des CA de confiance</li>
+                                </ul>
+
+                                <h6 class="text-success">🔑 Clés SSH</h6>
+                                <ul class="small">
+                                    <li>Ajoutez à ~/.ssh/authorized_keys</li>
+                                    <li>Protégez avec une passphrase</li>
+                                    <li>Désactivez l'auth par mot de passe</li>
+                                    <li>Utilisez Ed25519 de préférence</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rapport de Sécurité -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Rapport de Sécurité
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="securityReport">
+                            <!-- Contenu chargé dynamiquement -->
+                        </div>
+                        <button class="btn btn-outline-success" onclick="loadSecurityReport()">
+                            <i class="fas fa-refresh me-2"></i>Actualiser le Rapport
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5><i class="fas fa-ghost me-2"></i>Ghost Cyber Universe</h5>
+                    <p class="text-muted">Générateur de clés cryptographiques sécurisé</p>
+                </div>
+                <div class="col-lg-6 text-lg-end">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Sécurisé • Conforme • Open Source
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Chargement des recommandations de sécurité
+        async function loadSecurityRecommendations() {
+            try {
+                const response = await fetch('/api/security-recommendations');
+                const data = await response.json();
+                
+                const container = document.getElementById('securityRecommendations');
+                container.innerHTML = '<ul class="list-unstyled mb-0"></ul>';
+                
+                data.recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = rec;
+                    container.querySelector('ul').appendChild(li);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des recommandations:', error);
+            }
+        }
+
+        // Chargement du rapport de sécurité
+        async function loadSecurityReport() {
+            try {
+                const response = await fetch('/api/security-report');
+                const data = await response.json();
+                
+                const container = document.getElementById('securityReport');
+                container.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-primary">${data.total_requests}</h4>
+                                <small class="text-muted">Requêtes totales</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-success">${data.successful_requests}</h4>
+                                <small class="text-muted">Succès</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-warning">${data.failed_requests}</h4>
+                                <small class="text-muted">Échecs</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-info">${data.success_rate.toFixed(1)}%</h4>
+                                <small class="text-muted">Taux de succès</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Types de clés générées (24h)</h6>
+                            <ul class="list-unstyled">
+                                ${Object.entries(data.key_types_generated).map(([type, count]) => 
+                                    `<li><i class="fas fa-key me-2"></i>${type}: ${count}</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Statistiques</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-users me-2"></i>Adresses IP uniques: ${data.unique_ip_addresses}</li>
+                                <li><i class="fas fa-tachometer-alt me-2"></i>Rate limits actifs: ${data.rate_limits_active}</li>
+                                <li><i class="fas fa-exclamation-triangle me-2"></i>Avertissements: ${data.security_warnings_count}</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erreur lors du chargement du rapport:', error);
+                document.getElementById('securityReport').innerHTML = 
+                    '<div class="alert alert-danger">Erreur lors du chargement du rapport de sécurité</div>';
+            }
+        }
+
+        // Chargement initial
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSecurityRecommendations();
+            loadSecurityReport();
+        });
+    </script>
+</body>
+</html>
+

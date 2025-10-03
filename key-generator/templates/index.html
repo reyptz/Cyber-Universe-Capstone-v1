@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-ghost me-2"></i>
+                Ghost Cyber Universe
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/generate">Générer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security">Sécurité</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">À Propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/docs">API Docs</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section bg-gradient-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        <i class="fas fa-key me-3"></i>
+                        Générateur de Clés Cryptographiques
+                    </h1>
+                    <p class="lead mb-4">
+                        Générez des clés cryptographiques sécurisées de tous types avec les meilleures pratiques de sécurité.
+                        Support complet pour AES, RSA, ECC, Ed25519, certificats TLS, clés SSH, et bien plus.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/generate" class="btn btn-light btn-lg">
+                            <i class="fas fa-plus me-2"></i>
+                            Générer une Clé
+                        </a>
+                        <a href="/api/docs" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-code me-2"></i>
+                            API Documentation
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt display-1 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="display-5 fw-bold mb-4">Types de Clés Supportés</h2>
+                    <p class="lead text-muted">
+                        Générez tous les types de clés cryptographiques nécessaires pour vos applications
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Clés Symétriques -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h5 class="card-title">Clés Symétriques</h5>
+                            <p class="card-text text-muted">
+                                AES-128/192/256, ChaCha20-Poly1305 pour le chiffrement de données
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>AES-256 recommandé</li>
+                                <li><i class="fas fa-check text-success me-2"></i>ChaCha20-Poly1305</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Clés de session</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clés Asymétriques -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <h5 class="card-title">Clés Asymétriques</h5>
+                            <p class="card-text text-muted">
+                                RSA, ECC, Ed25519, X25519 pour signatures et échange de clés
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>RSA 2048/3072/4096</li>
+                                <li><i class="fas fa-check text-success me-2"></i>ECC (P-256, P-384, P-521)</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Ed25519/X25519</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificats TLS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h5 class="card-title">Certificats TLS</h5>
+                            <p class="card-text text-muted">
+                                Certificats X.509 pour HTTPS/TLS avec CSR
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Auto-signés</li>
+                                <li><i class="fas fa-check text-success me-2"></i>CSR pour CA</li>
+                                <li><i class="fas fa-check text-success me-2"></i>PKCS#12/PFX</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clés SSH -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-terminal"></i>
+                            </div>
+                            <h5 class="card-title">Clés SSH</h5>
+                            <p class="card-text text-muted">
+                                Clés d'authentification SSH (RSA, ECDSA, Ed25519)
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Format OpenSSH</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Passphrase optionnelle</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Multi-algorithmes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crypto-monnaie -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <h5 class="card-title">BIP39 (Crypto)</h5>
+                            <p class="card-text text-muted">
+                                Mnémoniques pour wallets crypto-monnaie
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>12/24 mots</li>
+                                <li><i class="fas fa-check text-success me-2"></i>BIP39 standard</li>
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Stockage hors-ligne</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JWT/API -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h5 class="card-title">JWT/API Tokens</h5>
+                            <p class="card-text text-muted">
+                                Clés pour JSON Web Tokens et APIs
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>HS256/HS512</li>
+                                <li><i class="fas fa-check text-success me-2"></i>RS256/ES256</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Format JWK</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Features -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="display-5 fw-bold mb-4">Sécurité de Pointe</h2>
+                    <p class="lead text-muted">
+                        Implémentation des meilleures pratiques de sécurité cryptographique
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="security-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-random fa-2x"></i>
+                        </div>
+                        <h5>CSPRNG</h5>
+                        <p class="text-muted">Générateur de nombres aléatoires cryptographiquement sûr</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="security-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <h5>Protection des Clés</h5>
+                        <p class="text-muted">Chiffrement des clés privées avec mots de passe forts</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="security-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-history fa-2x"></i>
+                        </div>
+                        <h5>Audit & Logs</h5>
+                        <p class="text-muted">Traçabilité complète des opérations de génération</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <div class="security-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-tachometer-alt fa-2x"></i>
+                        </div>
+                        <h5>Rate Limiting</h5>
+                        <p class="text-muted">Protection contre les abus et attaques par déni de service</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formats de Sortie -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="display-5 fw-bold mb-4">Formats de Sortie</h2>
+                    <p class="lead text-muted">
+                        Export dans tous les formats standards de l'industrie
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-primary text-white rounded p-3 text-center">
+                        <i class="fas fa-file-code fa-2x mb-2"></i>
+                        <div>PEM</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-success text-white rounded p-3 text-center">
+                        <i class="fas fa-file-binary fa-2x mb-2"></i>
+                        <div>DER</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-warning text-white rounded p-3 text-center">
+                        <i class="fas fa-key fa-2x mb-2"></i>
+                        <div>PKCS#8</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-info text-white rounded p-3 text-center">
+                        <i class="fas fa-archive fa-2x mb-2"></i>
+                        <div>PKCS#12</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-secondary text-white rounded p-3 text-center">
+                        <i class="fas fa-code fa-2x mb-2"></i>
+                        <div>JWK</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-6">
+                    <div class="format-badge bg-dark text-white rounded p-3 text-center">
+                        <i class="fas fa-terminal fa-2x mb-2"></i>
+                        <div>OpenSSH</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container text-center">
+            <h2 class="display-5 fw-bold mb-4">Prêt à Générer vos Clés ?</h2>
+            <p class="lead mb-4">
+                Commencez dès maintenant avec notre générateur sécurisé et conforme aux standards
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/generate" class="btn btn-light btn-lg">
+                    <i class="fas fa-rocket me-2"></i>
+                    Commencer
+                </a>
+                <a href="/security" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    En Savoir Plus
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5><i class="fas fa-ghost me-2"></i>Ghost Cyber Universe</h5>
+                    <p class="text-muted">Générateur de clés cryptographiques sécurisé</p>
+                </div>
+                <div class="col-lg-6 text-lg-end">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Sécurisé • Conforme • Open Source
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

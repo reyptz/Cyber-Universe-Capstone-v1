@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  key-generator:
+    build: .
+    container_name: ghost-key-generator
+    ports:
+      - "8000:8000"
+    environment:
+      - KEY_GENERATOR_HOST=0.0.0.0
+      - KEY_GENERATOR_PORT=8000
+      - KEY_GENERATOR_DEBUG=False
+      - KEY_GENERATOR_MAX_REQUESTS_PER_MINUTE=10
+      - KEY_GENERATOR_MAX_REQUESTS_PER_HOUR=100
+      - KEY_GENERATOR_MIN_PASSWORD_LENGTH=12
+    volumes:
+      - ./logs:/app/logs
+      - ./audit:/app/audit
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Service de monitoring (optionnel)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ghost-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  # Service de visualisation (optionnel)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ghost-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
+

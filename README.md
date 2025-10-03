@@ -2,32 +2,71 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![Rust](https://img.shields.io/badge/Rust-1.75+-orange.svg)](https://rust-lang.org)
+[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8.svg)](https://golang.org)
 [![License](https://img.shields.io/badge/License-AGPL%20v3-yellow.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Security-ISO%2027001-red.svg)](https://www.iso.org/isoiec-27001-information-security.html)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Enabled-purple.svg)](https://www.devsecops.org)
-[![Crypto](https://img.shields.io/badge/Crypto-AES%20%7C%20RSA%20%7C%20ECC-orange.svg)](https://cryptography.io)
 
 ## 🚀 Description
 
-**Ghost Cyber Universe** est un laboratoire de cybersécurité tout-en-un qui couvre l'ensemble du spectre de la cybersécurité moderne. Ce projet capstone intègre la cryptographie avancée, les pratiques DevSecOps, et l'intelligence artificielle pour créer un écosystème de sécurité complet et innovant.
+**Ghost Cyber Universe** est un laboratoire de cybersécurité complet comprenant deux plateformes majeures :
 
-### 🎯 Objectifs Principaux
-- Fournir un environnement d'apprentissage et de recherche en cybersécurité
-- Implémenter des protocoles cryptographiques de pointe
-- Automatiser les processus de sécurité avec DevSecOps
-- Intégrer l'IA pour la détection et la prévention des menaces
+### 🔴 Offensive Operations Suite
+- **Genjutsu Engine** : Génération polymorphe de payloads avec LLVM (< 3 min)
+- **Ghost Compiler** : Injection reflective in-memory sans traces (Rust no_std)
+- **Hiraishin Framework** : IaC ultra-rapide (deploy/destroy < 180s, rollback < 60s)
+### 🔵 Defensive Intelligence Platform
+- **Shinra OSINT Agent** : Collecte automatisée (1000 pages/min) avec RAG
+- **KumoShield S-IA** : Détection temps réel (< 200ms) avec eBPF, Sigma, YARA
+- **Interface Web moderne** : React + TypeScript + TailwindCSS
+
+---
+
+## 🎯 Nouveautés — Implémentation Cahiers des Charges
+
+### ✨ Ce qui a été ajouté
+
+#### 🔴 Offensive Operations Suite (NOUVEAU)
+```
+offensive-ops/
+├── genjutsu/          # LLVM Pass pour polymorphisme
+├── ghost/             # Rust no_std loader
+├── hiraishin/         # Go CLI + Terraform IaC
+└── orchestrator/      # Python SBOM + Rekor
+```
+
+#### 🔵 Defensive Intelligence Platform (NOUVEAU)
+```
+defensive-ops/
+├── shinra/            # FastAPI OSINT Agent
+├── kumoshield/        # eBPF Sensors + Detection
+├── frontend/          # React Dashboard
+└── infra/             # Kubernetes manifests
+```
+
+#### 🔧 DevSecOps & CI/CD (NOUVEAU)
+- GitHub Actions avec SBOM CycloneDX
+- Sigstore/Cosign attestations SLSA v1.2
+- Prometheus + Grafana dashboards
+- Docker Compose stack complète
+
+### 🎯 Objectifs principaux
+- ✅ **Red Team** : Génération polymorphe, injection furtive, IaC < 180s
+- ✅ **Blue Team** : OSINT 1000 pages/min, détection < 200ms, SLA 99.5%
+- ✅ **DevSecOps** : CI/CD sécurisé, SBOM signées, monitoring temps réel
+- ✅ **Conformité** : ISO 27001/27007, RGPD, SLSA v1.2
 
 ### 👥 Public Cible
-- Étudiants en cybersécurité et cryptographie
-- Professionnels DevSecOps et ingénieurs sécurité
-- Chercheurs en sécurité informatique
-- Développeurs blockchain et crypto
+- Red/Blue Teams et pentesters
+- AnalystesSOC et threat hunters
+- DevSecOps engineers
+- Security researchers
 
 ## ✨ Fonctionnalités
 
 ### 🔐 Module Aetherium (Cryptographie)
 - **🔑 Protocole GKEP** : Ghost Key Exchange Protocol propriétaire
-- **📜 PKI Complète** : Infrastructure X.509, gestion certificats, CRLs
 - **🔄 Rotation Automatique** : Gestion intelligente des clés avec support blockchain
 - **🛡️ Chiffrement Multi-Algorithmes** : AES-GCM, RSA, ECC, RC4
 - **✍️ Signatures Numériques** : ECDSA, Ed25519, HMAC
@@ -54,60 +93,113 @@
 - **🔮 Oracles** : Chainlink
 - **🔐 ZK Proofs** : zkSNARKs, zkSTARKs, MPC
 
+---
+
 ## 🛠️ Installation
 
 ### 📋 Prérequis Techniques
-- **Python 3.11+** 
-- **Docker & Docker Compose**
-- **Git**
-- **Node.js 18+** (pour les outils blockchain)
 
-### 🚀 Installation Rapide
+#### Obligatoires
+- **Docker 24+** & **Docker Compose 2.0+**
+- **Git**
+- **Python 3.11+**
+- **Node.js 18+**
+
+#### Optionnels (pour Offensive Ops)
+- **Rust 1.75+** (Ghost Compiler)
+- **Go 1.21+** (Hiraishin CLI)
+- **LLVM 17+** (Genjutsu Engine)
+
+### 🚀 Installation Rapide (Recommandée)
 
 ```bash
-# Cloner le repository
-git clone https://github.com/votre-username/ghost-cyber-universe.git
+# 1. Cloner le repository
+git clone https://github.com/reyptz/ghost-cyber-universe.git
 cd ghost-cyber-universe
 
-# Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate     # Windows
+# 2. Lancer l'installation automatique
+chmod +x setup.sh
+./setup.sh all
 
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Configuration des variables d'environnement
-cp .env.example .env
-# Éditer .env avec vos configurations
-
-# Initialiser la base de données
-alembic upgrade head
-
-# Lancer l'application
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# OU installation sélective :
+./setup.sh defensive    # Defensive Ops uniquement
+./setup.sh offensive    # Offensive Ops uniquement
+./setup.sh monitoring   # Monitoring uniquement
 ```
 
-### 🐳 Installation avec Docker
+### 🐳 Installation avec Docker (Production)
 
 ```bash
-# Build et lancement avec Docker Compose
-docker-compose up --build -d
+# Démarrer tous les services
+docker-compose up -d
 
 # Vérifier le statut
 docker-compose ps
 
-# Accéder aux logs
-docker-compose logs -f
+# Accéder aux services
+# - Grafana:    http://localhost:3000 (admin/admin)
+# - API Docs:   http://localhost:8000/api/docs
+# - Frontend:   http://localhost:5173
+# - Prometheus: http://localhost:9090
+
+# Voir les logs
+docker-compose logs -f shinra-api
 ```
 
-### 🔧 Cas d'Usage Typiques
+### 💻 Installation Locale (Développement)
 
-- **Recherche Cryptographique** : Implémentation et test de nouveaux algorithmes
-- **Formation DevSecOps** : Apprentissage des bonnes pratiques de sécurité
-- **Audit de Sécurité** : Analyse et évaluation de vulnérabilités
-- **Développement Blockchain** : Prototypage d'applications décentralisées
+#### Backend (Shinra OSINT Agent)
+```bash
+cd defensive-ops/shinra
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn api.main:app --reload --port 8000
+```
+
+#### Frontend
+```bash
+cd defensive-ops/frontend
+npm install
+npm run dev
+```
+
+#### Offensive Ops
+```bash
+# Genjutsu Engine
+cd offensive-ops/genjutsu
+./build.sh
+
+# Ghost Compiler
+cd ../ghost
+cargo build --release
+
+# Hiraishin CLI
+cd ../hiraishin/cli
+go build -o hiraishin main.go
+```
+
+---
+
+## 🎯 Cas d'Usage
+
+### 🔴 Red Team / Offensive Security
+- **Payload Generation** : Générer des shellcodes polymorphes indétectables
+- **Stealth Injection** : Injecter du code en mémoire sans traces
+- **Rapid Infrastructure** : Déployer/détruire des environnements d'attaque en < 3 minutes
+- **Training Labs** : Créer des labs éphémères pour exercices Red Team
+
+### 🔵 Blue Team / Defensive Security
+- **OSINT Collection** : Collecter automatiquement des données de threat intelligence
+- **Real-time Detection** : Détecter des menaces avec < 200ms de latence
+- **Threat Hunting** : Rechercher des IOCs avec RAG et enrichissement IA
+- **SOC Automation** : Automatiser les playbooks de réponse aux incidents
+
+### 🟣 Purple Team / DevSecOps
+- **CI/CD Security** : Pipelines sécurisés avec SBOM et attestations
+- **Supply Chain Security** : Traçabilité complète avec Sigstore/Rekor
+- **Performance Monitoring** : Dashboards Grafana pour métriques opérationnelles
+- **Compliance** : Conformité ISO 27001/27007 et RGPD
 
 ## 🤝 Contribuer
 

@@ -1,0 +1,183 @@
+# Pre-commit hooks pour la sécurité et l'hygiène du code
+# Configuration selon les spécifications DevSecOps
+
+repos:
+  # Détection de secrets
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            \.secrets\.baseline|
+            \.env\.example|
+            tests/.*|
+            docs/.*
+          )$
+
+  # Gitleaks pour la détection de secrets
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+        args: ['--verbose', '--redact']
+
+  # Bandit pour la sécurité Python
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ['-r', '.', '-f', 'json', '-o', 'bandit-report.json']
+        exclude: |
+          (?x)^(
+            tests/.*|
+            docs/.*|
+            \.venv/.*|
+            venv/.*
+          )$
+
+  # Semgrep pour l'analyse statique
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.45.0
+    hooks:
+      - id: semgrep
+        args: ['--config=auto', '--severity=ERROR', '--severity=WARNING']
+
+  # Formatage et linting Python
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=88', '--target-version=py311']
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ['--profile', 'black', '--line-length=88']
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=88', '--extend-ignore=E203,W503']
+        additional_dependencies: [flake8-docstrings, flake8-bugbear]
+
+  # MyPy pour le typage
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.6.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, types-PyYAML]
+        args: ['--strict', '--ignore-missing-imports']
+
+  # Safety pour les vulnérabilités Python
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+        files: requirements\.txt$
+
+  # Dockerfile linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+  # Terraform linting
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.83.3
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tflint
+        args: ['--args=--only=terraform_deprecated_interpolation']
+
+  # Checkov pour IaC
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.1.14
+    hooks:
+      - id: checkov
+        args: ['--framework', 'terraform', '--framework', 'dockerfile']
+
+  # YAML linting
+  - repo: https://github.com/pre-commit/mirrors-yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ['-d', 'relaxed']
+
+  # JSON linting
+  - repo: https://github.com/pre-commit/mirrors-jsonlint
+    rev: v1.6.0
+    hooks:
+      - id: jsonlint
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  # Trivy pour les vulnérabilités
+  - repo: https://github.com/aquasecurity/trivy
+    rev: v0.48.0
+    hooks:
+      - id: trivy
+        args: ['fs', '--severity', 'HIGH,CRITICAL', '--exit-code', '1']
+
+  # Tfsec pour Terraform
+  - repo: https://github.com/aquasecurity/tfsec
+    rev: v1.28.1
+    hooks:
+      - id: tfsec
+        args: ['--severity', 'HIGH', '--severity', 'CRITICAL']
+
+  # Commit message linting
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # License check
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-toml
+
+# Configuration globale
+default_stages: [commit, push]
+fail_fast: false
+minimum_pre_commit_version: 3.0.0
+
+# Configuration des hooks
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
