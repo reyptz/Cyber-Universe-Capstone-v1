@@ -9,8 +9,8 @@ import sys
 import uvicorn
 from pathlib import Path
 
-# Ajouter le répertoire parent au path pour les imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ajouter le répertoire courant au path pour les imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 def main():
     """Point d'entrée principal"""
@@ -28,9 +28,9 @@ def main():
         sys.exit(1)
     
     # Création des répertoires nécessaires
-    os.makedirs("key-generator/templates", exist_ok=True)
-    os.makedirs("key-generator/static/css", exist_ok=True)
-    os.makedirs("key-generator/static/js", exist_ok=True)
+    os.makedirs("templates", exist_ok=True)
+    os.makedirs("static/css", exist_ok=True)
+    os.makedirs("static/js", exist_ok=True)
     
     print("📁 Répertoires créés")
     print("🌐 Interface web: http://localhost:8000")
@@ -40,7 +40,7 @@ def main():
     
     # Configuration du serveur
     config = {
-        "app": "key-generator.api:app",
+        "app": "api:app",
         "host": "0.0.0.0",
         "port": 8000,
         "reload": True,

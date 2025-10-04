@@ -64,6 +64,10 @@ security = HTTPBearer(auto_error=False)
 # Modèles de données
 from pydantic import BaseModel, Field
 
+class PasswordValidationRequest(BaseModel):
+    """Modèle pour la validation de mot de passe"""
+    password: str
+
 class KeyGenerationRequest(BaseModel):
     """Modèle de requête pour la génération de clés"""
     key_type: str
@@ -407,12 +411,13 @@ async def get_security_report():
 
 
 @app.post("/api/validate-password")
-async def validate_password(password: str):
+async def validate_password(request: PasswordValidationRequest):
     """Valide la force d'un mot de passe"""
-    is_strong, warnings = security_manager.validate_password_strength(password)
+    is_strong, warnings = security_manager.validate_password_strength(request.password)
     return {
         "is_strong": is_strong,
-        "warnings": warnings
+        "warnings": warnings,
+        "score": 4 if is_strong else max(0, 4 - len(warnings))
     }
 
 
@@ -497,13 +502,13 @@ async def cleanup_old_data():
 
 if __name__ == "__main__":
     # Création des répertoires nécessaires
-    os.makedirs("key-generator/templates", exist_ok=True)
-    os.makedirs("key-generator/static", exist_ok=True)
+    os.makedirs("templates", exist_ok=True)
+    os.makedirs("static", exist_ok=True)
     
     # Démarrage du serveur
     uvicorn.run(
         app,
         host="127.0.0.1",
-        port=8080,
+        port=8000,
         log_level="info"
     )

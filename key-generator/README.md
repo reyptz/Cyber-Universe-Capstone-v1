@@ -78,6 +78,37 @@ Un générateur complet de clés cryptographiques avec toutes les bonnes pratiqu
 - **Surveillance des abus**
 - **Rapports de sécurité**
 
+## 🎯 Interface Web Complète
+
+L'application dispose maintenant d'une interface web moderne et complète avec un thème cyber futuriste :
+
+### Pages Disponibles
+
+- **Page d'accueil** (`/`) : Présentation des fonctionnalités et navigation
+- **Génération de clés** (`/generate`) : Interface complète de génération avec formulaire dynamique
+- **Sécurité** (`/security`) : Bonnes pratiques, recommandations et rapports de sécurité
+- **À propos** (`/about`) : Documentation complète du projet Ghost Cyber Universe
+- **API Docs** (`/api/docs`) : Documentation interactive Swagger/OpenAPI
+
+### Fonctionnalités de l'Interface
+
+- 🎨 **Thème Cyber Moderne** : Interface futuriste avec effets visuels (glow, animations)
+- 📱 **Responsive Design** : Compatible mobile, tablette et desktop
+- ⚡ **Animations Fluides** : Effets cyber, particules et transitions modernes
+- 🔒 **Validation Temps Réel** : Feedback immédiat sur les paramètres de génération
+- 🛡️ **Sécurité Renforcée** : Protection, validation et avertissements complets
+- 🎭 **Effets Visuels** : Particules, trails de souris, animations de texte
+- 📊 **Dashboard de Sécurité** : Métriques et rapports en temps réel
+
+### Technologies Frontend
+
+- **HTML5** avec templates Jinja2
+- **Bootstrap 5** pour le layout responsive
+- **CSS3** personnalisé avec thème cyber
+- **JavaScript ES6+** pour l'interactivité
+- **Font Awesome** pour les icônes
+- **Animations CSS3** et JavaScript pour les effets visuels
+
 ## 🚀 Installation
 
 ### Prérequis
@@ -102,10 +133,23 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 
 # Lancer le serveur
-python api.py
+python run.py
 ```
 
-### Installation avec Docker
+### 🐳 Installation avec Docker (Recommandé)
+
+```bash
+# Démarrer avec Docker Compose (plus simple)
+docker-compose up -d
+
+# Vérifier le statut
+docker-compose ps
+
+# Voir les logs
+docker-compose logs -f
+```
+
+### Installation avec Docker manuelle
 
 ```bash
 # Build de l'image
@@ -117,13 +161,23 @@ docker run -p 8000:8000 ghost-key-generator
 
 ## 📖 Utilisation
 
-### Interface Web
+### Interface Web Complète
 
 1. **Accédez à l'interface** : http://localhost:8000
-2. **Sélectionnez le type de clé** souhaité
-3. **Configurez les paramètres** (algorithme, taille, format)
-4. **Protégez avec un mot de passe** (recommandé)
-5. **Générez et téléchargez** votre clé
+2. **Navigation intuitive** : Utilisez le menu pour accéder aux différentes sections
+3. **Page de génération** : Formulaire complet avec validation temps réel
+4. **Sélection dynamique** : Types de clés et algorithmes mis à jour automatiquement
+5. **Protection avancée** : Mots de passe avec indicateur de force
+6. **Résultats sécurisés** : Affichage et téléchargement des clés générées
+7. **Documentation intégrée** : Pages de sécurité et à propos complètes
+
+#### Fonctionnalités de l'Interface
+
+- 🎨 **Thème Cyber** : Interface futuriste avec effets visuels
+- 📱 **Responsive** : Optimisé pour tous les appareils
+- ⚡ **Animations** : Effets fluides et transitions modernes
+- 🔒 **Validation** : Feedback immédiat sur les paramètres
+- 🛡️ **Sécurité** : Avertissements et recommandations intégrés
 
 ### API REST
 

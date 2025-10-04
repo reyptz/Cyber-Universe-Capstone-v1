@@ -1,3 +1,6 @@
+# Ghost Cyber Universe - Docker Compose
+# Configuration pour le déploiement du générateur de clés
+
 version: '3.8'
 
 services:
@@ -12,7 +15,6 @@ services:
       - KEY_GENERATOR_DEBUG=False
       - KEY_GENERATOR_MAX_REQUESTS_PER_MINUTE=10
       - KEY_GENERATOR_MAX_REQUESTS_PER_HOUR=100
-      - KEY_GENERATOR_MIN_PASSWORD_LENGTH=12
     volumes:
       - ./logs:/app/logs
       - ./audit:/app/audit
@@ -23,37 +25,26 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - ghost-network
 
   # Service de monitoring (optionnel)
-  prometheus:
+  monitoring:
     image: prom/prometheus:latest
-    container_name: ghost-prometheus
+    container_name: ghost-monitoring
     ports:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    restart: unless-stopped
+    networks:
+      - ghost-network
+    profiles:
+      - monitoring
 
-  # Service de visualisation (optionnel)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: ghost-grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-storage:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    restart: unless-stopped
+networks:
+  ghost-network:
+    driver: bridge
 
 volumes:
-  grafana-storage:
-
+  logs:
+  audit:

@@ -1,5 +1,5 @@
-# Dockerfile pour le générateur de clés cryptographiques
-# Ghost Cyber Universe
+# Ghost Cyber Universe - Générateur de Clés Cryptographiques
+# Dockerfile pour le déploiement
 
 FROM python:3.11-slim
 
@@ -15,43 +15,39 @@ ENV KEY_GENERATOR_HOST=0.0.0.0
 ENV KEY_GENERATOR_PORT=8000
 ENV KEY_GENERATOR_DEBUG=False
 
-# Installation des dépendances système
+# Créer un utilisateur non-root
+RUN groupadd -r ghost && useradd -r -g ghost ghost
+
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
-    libffi-dev \
     libssl-dev \
-    curl \
+    libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Création du répertoire de travail
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Copie des fichiers de dépendances
+# Copier les fichiers de dépendances
 COPY requirements.txt .
 
-# Installation des dépendances Python
+# Installer les dépendances Python
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copie du code source
+# Copier le code source
 COPY . .
 
-# Création des répertoires nécessaires
-RUN mkdir -p /app/logs /app/audit /app/static /app/templates
+# Créer les répertoires nécessaires
+RUN mkdir -p templates static/css static/js && \
+    chown -R ghost:ghost /app
 
-# Utilisateur non-root pour la sécurité
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
-USER app
+# Changer vers l'utilisateur non-root
+USER ghost
 
-# Exposition du port
+# Exposer le port
 EXPOSE 8000
 
-# Vérification de santé
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/api/health || exit 1
-
-# Commande de démarrage
+# Point d'entrée
 CMD ["python", "run.py"]
-

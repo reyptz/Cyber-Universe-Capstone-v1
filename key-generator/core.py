@@ -1140,3 +1140,390 @@ class CryptographicKeyGenerator:
             },
             security_warnings=self.security_warnings
         )
+
+"""
+Types de clés étendus pour tous les domaines IT
+==============================================
+
+Ce module étend le système de génération de clés pour couvrir tous les domaines
+informatiques nécessitant des clés cryptographiques.
+"""
+
+from enum import Enum
+from typing import Dict, List, Any
+import json
+from pathlib import Path
+
+class ExtendedKeyType(Enum):
+    """Types de clés étendus couvrant tous les domaines IT"""
+    
+    # === CLÉS SYMÉTRIQUES ===
+    SYMMETRIC = "symmetric"
+    BLOCK_CIPHER = "block_cipher"
+    STREAM_CIPHER = "stream_cipher"
+    
+    # === CLÉS ASYMÉTRIQUES ===
+    ASYMMETRIC = "asymmetric"
+    RSA = "rsa"
+    ECC = "ecc"
+    EDWARDS_CURVE = "edwards_curve"
+    
+    # === CRYPTOGRAPHIE POST-QUANTUM ===
+    POST_QUANTUM = "post_quantum"
+    LATTICE_BASED = "lattice_based"
+    CODE_BASED = "code_based"
+    HASH_BASED = "hash_based"
+    ISOGENY_BASED = "isogeny_based"
+    
+    # === CERTIFICATS TLS/SSL ===
+    TLS_CERT = "tls_cert"
+    SERVER_CERT = "server_cert"
+    CLIENT_CERT = "client_cert"
+    INTERMEDIATE_CA = "intermediate_ca"
+    ROOT_CA = "root_ca"
+    CODE_SIGNING_CERT = "code_signing_cert"
+    EMAIL_CERT = "email_cert"
+    
+    # === CLÉS SSH ===
+    SSH_KEY = "ssh_key"
+    SSH_RSA = "ssh_rsa"
+    SSH_ECDSA = "ssh_ecdsa"
+    SSH_ED25519 = "ssh_ed25519"
+    
+    # === PORTEFEUILLES CRYPTOGRAPHIQUES ===
+    CRYPTO_WALLET = "crypto_wallet"
+    BIP39 = "bip39"
+    BIP32 = "bip32"
+    BIP44 = "bip44"
+    BIP49 = "bip49"
+    BIP84 = "bip84"
+    
+    # === JWT ET API ===
+    JWT_TOKEN = "jwt_token"
+    API_KEY = "api_key"
+    OAUTH_KEY = "oauth_key"
+    
+    # === SÉCURITÉ DES BASES DE DONNÉES ===
+    DATABASE_ENCRYPTION = "database_encryption"
+    TDE = "tde"
+    COLUMN_ENCRYPTION = "column_encryption"
+    FIELD_ENCRYPTION = "field_encryption"
+    
+    # === BLOCKCHAIN ===
+    BLOCKCHAIN = "blockchain"
+    BITCOIN = "bitcoin"
+    ETHEREUM = "ethereum"
+    MONERO = "monero"
+    LITECOIN = "litecoin"
+    RIPPLE = "ripple"
+    CARDANO = "cardano"
+    POLKADOT = "polkadot"
+    
+    # === IoT ET CAPTEURS ===
+    IOT_SECURITY = "iot_security"
+    DEVICE_KEY = "device_key"
+    SENSOR_KEY = "sensor_key"
+    GATEWAY_KEY = "gateway_key"
+    EDGE_KEY = "edge_key"
+    
+    # === SÉCURITÉ CLOUD ===
+    CLOUD_SECURITY = "cloud_security"
+    AWS_KMS = "aws_kms"
+    AZURE_KEY_VAULT = "azure_key_vault"
+    GOOGLE_CLOUD_KMS = "google_cloud_kms"
+    IBM_CLOUD_HSM = "ibm_cloud_hsm"
+    ORACLE_CLOUD_VAULT = "oracle_cloud_vault"
+    
+    # === SÉCURITÉ MOBILE ===
+    MOBILE_SECURITY = "mobile_security"
+    ANDROID = "android"
+    IOS = "ios"
+    WINDOWS_MOBILE = "windows_mobile"
+    
+    # === OTP/TOTP ===
+    OTP = "otp"
+    TOTP = "totp"
+    HOTP = "hotp"
+    SMS_OTP = "sms_otp"
+    EMAIL_OTP = "email_otp"
+    
+    # === SIGNATURES NUMÉRIQUES ===
+    DIGITAL_SIGNATURE = "digital_signature"
+    DOCUMENT_SIGNING = "document_signing"
+    CODE_SIGNING = "code_signing"
+    PDF_SIGNING = "pdf_signing"
+    XML_SIGNING = "xml_signing"
+    
+    # === SÉCURITÉ EMAIL ===
+    EMAIL_SECURITY = "email_security"
+    PGP = "pgp"
+    SMIME = "smime"
+    DKIM = "dkim"
+    SPF = "spf"
+    DMARC = "dmarc"
+    
+    # === VPN ===
+    VPN_KEY = "vpn_key"
+    OPENVPN = "openvpn"
+    WIREGUARD = "wireguard"
+    IPSEC = "ipsec"
+    L2TP = "l2tp"
+    PPTP = "pptp"
+    
+    # === SÉCURITÉ DES CONTENEURS ===
+    CONTAINER_SECURITY = "container_security"
+    DOCKER = "docker"
+    KUBERNETES = "kubernetes"
+    PODMAN = "podman"
+    CONTAINERD = "containerd"
+    
+    # === MICROSERVICES ===
+    MICROSERVICES = "microservices"
+    SERVICE_MESH = "service_mesh"
+    API_GATEWAY = "api_gateway"
+    SERVICE_DISCOVERY = "service_discovery"
+    
+    # === DEVOPS ===
+    DEVOPS_SECURITY = "devops_security"
+    CI_CD = "ci_cd"
+    SECRETS_MANAGEMENT = "secrets_management"
+    INFRASTRUCTURE_AS_CODE = "infrastructure_as_code"
+    
+    # === SÉCURITÉ RÉSEAU ===
+    NETWORK_SECURITY = "network_security"
+    WIFI_SECURITY = "wifi_security"
+    BLUETOOTH_SECURITY = "bluetooth_security"
+    ZIGBEE_SECURITY = "zigbee_security"
+    
+    # === SÉCURITÉ APPLICATIVE ===
+    APPLICATION_SECURITY = "application_security"
+    WEB_APPLICATION = "web_application"
+    DESKTOP_APPLICATION = "desktop_application"
+    EMBEDDED_APPLICATION = "embedded_application"
+    
+    # === SÉCURITÉ SYSTÈME ===
+    SYSTEM_SECURITY = "system_security"
+    BOOT_SECURITY = "boot_security"
+    DISK_ENCRYPTION = "disk_encryption"
+    FILE_ENCRYPTION = "file_encryption"
+    
+    # === SÉCURITÉ MÉDICALE ===
+    MEDICAL_SECURITY = "medical_security"
+    HIPAA_COMPLIANCE = "hipaa_compliance"
+    MEDICAL_DEVICE = "medical_device"
+    PATIENT_DATA = "patient_data"
+    
+    # === SÉCURITÉ FINANCIÈRE ===
+    FINANCIAL_SECURITY = "financial_security"
+    PCI_DSS = "pci_dss"
+    BANKING = "banking"
+    PAYMENT_PROCESSING = "payment_processing"
+    
+    # === SÉCURITÉ GOUVERNEMENTALE ===
+    GOVERNMENT_SECURITY = "government_security"
+    MILITARY_GRADE = "military_grade"
+    CLASSIFIED_DATA = "classified_data"
+    NATIONAL_SECURITY = "national_security"
+    
+    # === SÉCURITÉ AUTOMOTIVE ===
+    AUTOMOTIVE_SECURITY = "automotive_security"
+    VEHICLE_KEY = "vehicle_key"
+    ECU_SECURITY = "ecu_security"
+    TELEMATICS = "telematics"
+    
+    # === SÉCURITÉ AÉRONAUTIQUE ===
+    AEROSPACE_SECURITY = "aerospace_security"
+    AIRCRAFT_KEY = "aircraft_key"
+    SATELLITE_KEY = "satellite_key"
+    AVIONICS = "avionics"
+
+class AlgorithmCategory(Enum):
+    """Catégories d'algorithmes cryptographiques"""
+    SYMMETRIC = "symmetric"
+    ASYMMETRIC = "asymmetric"
+    HASH = "hash"
+    MAC = "mac"
+    KDF = "kdf"
+    POST_QUANTUM = "post_quantum"
+    HYBRID = "hybrid"
+
+class SecurityLevel(Enum):
+    """Niveaux de sécurité"""
+    LOW = "low"           # 80 bits de sécurité
+    MEDIUM = "medium"     # 112 bits de sécurité
+    HIGH = "high"         # 128 bits de sécurité
+    VERY_HIGH = "very_high"  # 192 bits de sécurité
+    ULTRA_HIGH = "ultra_high"  # 256 bits de sécurité
+    QUANTUM_SAFE = "quantum_safe"  # Résistant aux ordinateurs quantiques
+
+class ComplianceStandard(Enum):
+    """Standards de conformité"""
+    FIPS_140_2 = "fips_140_2"
+    FIPS_140_3 = "fips_140_3"
+    COMMON_CRITERIA = "common_criteria"
+    PCI_DSS = "pci_dss"
+    HIPAA = "hipaa"
+    SOX = "sox"
+    GDPR = "gdpr"
+    ISO_27001 = "iso_27001"
+    NIST = "nist"
+    CNSA = "cnsa"
+
+def load_complete_key_types() -> Dict[str, Any]:
+    """Charge la configuration complète des types de clés"""
+    config_path = Path(__file__).parent / "complete_key_types.json"
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def get_key_types_by_domain(domain: str) -> List[Dict[str, Any]]:
+    """Retourne les types de clés pour un domaine spécifique"""
+    config = load_complete_key_types()
+    return config.get(domain, {})
+
+def get_all_domains() -> List[str]:
+    """Retourne tous les domaines supportés"""
+    config = load_complete_key_types()
+    return list(config.keys())
+
+def get_algorithms_for_key_type(key_type: str) -> List[Dict[str, Any]]:
+    """Retourne les algorithmes disponibles pour un type de clé"""
+    config = load_complete_key_types()
+    
+    # Recherche récursive dans la configuration
+    def find_algorithms(obj, target_type):
+        if isinstance(obj, dict):
+            if target_type in obj:
+                return obj[target_type]
+            for value in obj.values():
+                result = find_algorithms(value, target_type)
+                if result:
+                    return result
+        return None
+    
+    return find_algorithms(config, key_type) or {}
+
+def get_security_recommendations(key_type: str, use_case: str) -> Dict[str, Any]:
+    """Retourne les recommandations de sécurité pour un type de clé et cas d'usage"""
+    recommendations = {
+        "symmetric": {
+            "general": {
+                "recommended_algorithm": "AES-256",
+                "minimum_key_size": 128,
+                "recommended_key_size": 256,
+                "security_level": SecurityLevel.HIGH.value
+            },
+            "database": {
+                "recommended_algorithm": "AES-256",
+                "key_rotation": "90 days",
+                "security_level": SecurityLevel.HIGH.value
+            },
+            "iot": {
+                "recommended_algorithm": "AES-128",
+                "minimum_key_size": 128,
+                "security_level": SecurityLevel.MEDIUM.value
+            }
+        },
+        "asymmetric": {
+            "general": {
+                "recommended_algorithm": "RSA-3072",
+                "minimum_key_size": 2048,
+                "recommended_key_size": 3072,
+                "security_level": SecurityLevel.HIGH.value
+            },
+            "tls": {
+                "recommended_algorithm": "ECDSA-P256",
+                "minimum_key_size": 256,
+                "security_level": SecurityLevel.HIGH.value
+            },
+            "ssh": {
+                "recommended_algorithm": "Ed25519",
+                "minimum_key_size": 256,
+                "security_level": SecurityLevel.HIGH.value
+            }
+        },
+        "post_quantum": {
+            "general": {
+                "recommended_algorithm": "CRYSTALS-Kyber",
+                "security_level": SecurityLevel.QUANTUM_SAFE.value,
+                "note": "Résistant aux attaques quantiques"
+            }
+        }
+    }
+    
+    return recommendations.get(key_type, {}).get(use_case, {})
+
+def get_compliance_requirements(standard: ComplianceStandard) -> Dict[str, Any]:
+    """Retourne les exigences de conformité pour un standard"""
+    requirements = {
+        ComplianceStandard.FIPS_140_2: {
+            "approved_algorithms": ["AES", "RSA", "ECDSA", "SHA-256", "SHA-384", "SHA-512"],
+            "minimum_key_sizes": {
+                "AES": 128,
+                "RSA": 2048,
+                "ECDSA": 224
+            },
+            "key_management": "Hardware Security Module (HSM) recommended"
+        },
+        ComplianceStandard.PCI_DSS: {
+            "approved_algorithms": ["AES", "RSA", "ECDSA"],
+            "minimum_key_sizes": {
+                "AES": 128,
+                "RSA": 2048,
+                "ECDSA": 224
+            },
+            "key_rotation": "Annual or when compromised"
+        },
+        ComplianceStandard.HIPAA: {
+            "approved_algorithms": ["AES", "RSA", "ECDSA"],
+            "minimum_key_sizes": {
+                "AES": 128,
+                "RSA": 2048,
+                "ECDSA": 224
+            },
+            "encryption_required": "At rest and in transit"
+        }
+    }
+    
+    return requirements.get(standard, {})
+
+# Mapping des domaines IT aux types de clés
+IT_DOMAINS_MAPPING = {
+    "Infrastructure": [
+        "TLS_CERT", "SSH_KEY", "VPN_KEY", "NETWORK_SECURITY"
+    ],
+    "Application": [
+        "JWT_TOKEN", "API_KEY", "DIGITAL_SIGNATURE", "APPLICATION_SECURITY"
+    ],
+    "Database": [
+        "DATABASE_ENCRYPTION", "TDE", "COLUMN_ENCRYPTION"
+    ],
+    "Cloud": [
+        "CLOUD_SECURITY", "AWS_KMS", "AZURE_KEY_VAULT", "GOOGLE_CLOUD_KMS"
+    ],
+    "Mobile": [
+        "MOBILE_SECURITY", "ANDROID", "IOS"
+    ],
+    "IoT": [
+        "IOT_SECURITY", "DEVICE_KEY", "SENSOR_KEY"
+    ],
+    "Blockchain": [
+        "BLOCKCHAIN", "BITCOIN", "ETHEREUM", "CRYPTO_WALLET"
+    ],
+    "DevOps": [
+        "DEVOPS_SECURITY", "CI_CD", "SECRETS_MANAGEMENT", "CONTAINER_SECURITY"
+    ],
+    "Security": [
+        "POST_QUANTUM", "SYMMETRIC", "ASYMMETRIC", "OTP"
+    ],
+    "Compliance": [
+        "FIPS_140_2", "PCI_DSS", "HIPAA", "GOVERNMENT_SECURITY"
+    ]
+}
+
+def get_domain_key_types(domain: str) -> List[str]:
+    """Retourne les types de clés pour un domaine IT spécifique"""
+    return IT_DOMAINS_MAPPING.get(domain, [])
+
+def get_all_it_domains() -> List[str]:
+    """Retourne tous les domaines IT supportés"""
+    return list(IT_DOMAINS_MAPPING.keys())
