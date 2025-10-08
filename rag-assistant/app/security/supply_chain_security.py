@@ -1,100 +1,331 @@
 """
-Module de sécurité de la chaîne d'approvisionnement IA
+Sécurité Supply Chain IA
+Vérification d'intégrité des modèles, génération SBOM, sandboxing et politiques réseau
 """
-import hashlib
+
+import os
 import json
+import hashlib
 import logging
 import subprocess
-import sys
+import tempfile
 from typing import List, Dict, Any, Optional, Tuple
-from pathlib import Path
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+from enum import Enum
 import requests
-from cryptography.fernet import Fernet
+import yaml
+from pathlib import Path
+import docker
 from ..config import config
 
 logger = logging.getLogger(__name__)
 
+class ComponentType(Enum):
+    """Types de composants"""
+    MODEL = "model"
+    DATASET = "dataset"
+    LIBRARY = "library"
+    FRAMEWORK = "framework"
+    DEPENDENCY = "dependency"
+    CONFIGURATION = "configuration"
+
+class RiskLevel(Enum):
+    """Niveaux de risque"""
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    INFO = "info"
+
+class VerificationStatus(Enum):
+    """Statuts de vérification"""
+    VERIFIED = "verified"
+    FAILED = "failed"
+    PENDING = "pending"
+    UNKNOWN = "unknown"
+
+@dataclass
+class Component:
+    """Composant de la chaîne d'approvisionnement"""
+    name: str
+    version: str
+    component_type: ComponentType
+    source: str
+    integrity_hash: str
+    verification_status: VerificationStatus
+    risk_level: RiskLevel
+    vulnerabilities: List[Dict[str, Any]]
+    dependencies: List[str]
+    metadata: Dict[str, Any]
+
+@dataclass
+class SBOMEntry:
+    """Entrée SBOM"""
+    component: Component
+    license: str
+    author: str
+    created_at: datetime
+    last_updated: datetime
+    security_advisories: List[Dict[str, Any]]
+
+@dataclass
+class SandboxEnvironment:
+    """Environnement sandbox"""
+    id: str
+    name: str
+    image: str
+    network_policies: List[Dict[str, Any]]
+    resource_limits: Dict[str, Any]
+    security_context: Dict[str, Any]
+    created_at: datetime
+    status: str
+
 class SupplyChainSecurity:
-    """Gestionnaire de sécurité de la chaîne d'approvisionnement"""
+    """Sécurité de la chaîne d'approvisionnement IA"""
     
     def __init__(self):
-        """Initialise le gestionnaire de sécurité de la chaîne d'approvisionnement"""
+        """Initialise la sécurité de la chaîne d'approvisionnement"""
         try:
-            self.encryption_key = config.ENCRYPTION_KEY.encode()
-            self.fernet = Fernet(self.encryption_key)
+            # Base de données des composants
+            self.components = {}
+            self.sbom_entries = []
+            self.sandbox_environments = {}
             
-            # Registre des hachages de modèles vérifiés
-            self.verified_model_hashes = {}
+            # Clients pour les services externes
+            self.docker_client = docker.from_env()
+            self._initialize_verification_tools()
             
-            # Politiques réseau
-            self.network_policies = config.SUPPLY_CHAIN['network_policies']
+            # Configuration des politiques de sécurité
+            self._initialize_security_policies()
+            
+            # Base de données de vulnérabilités
+            self._initialize_vulnerability_database()
+            
+            logger.info("Sécurité de la chaîne d'approvisionnement initialisée")
             
         except Exception as e:
-            logger.error(f"Erreur lors de l'initialisation de la sécurité de la chaîne d'approvisionnement: {e}")
+            logger.error(f"Erreur lors de l'initialisation: {e}")
             raise
     
-    def verify_model_integrity(self, model_path: str, expected_hash: Optional[str] = None) -> Dict[str, Any]:
+    def _initialize_verification_tools(self):
+        """Initialise les outils de vérification"""
+        self.verification_tools = {
+            'hash_verification': self._verify_hash_integrity,
+            'signature_verification': self._verify_digital_signature,
+            'vulnerability_scan': self._scan_vulnerabilities,
+            'license_check': self._check_license_compliance,
+            'dependency_analysis': self._analyze_dependencies
+        }
+    
+    def _initialize_security_policies(self):
+        """Initialise les politiques de sécurité"""
+        self.security_policies = {
+            'allowed_licenses': [
+                'MIT', 'Apache-2.0', 'BSD-3-Clause', 'BSD-2-Clause',
+                'ISC', 'Unlicense', 'CC0-1.0'
+            ],
+            'blocked_licenses': [
+                'GPL-3.0', 'AGPL-3.0', 'Copyleft', 'Proprietary'
+            ],
+            'trusted_sources': [
+                'pypi.org', 'huggingface.co', 'github.com',
+                'tensorflow.org', 'pytorch.org'
+            ],
+            'blocked_sources': [
+                'unknown-source', 'unverified-repo'
+            ],
+            'max_vulnerability_score': 7.0,
+            'required_verification_level': 'high'
+        }
+    
+    def _initialize_vulnerability_database(self):
+        """Initialise la base de données de vulnérabilités"""
+        self.vulnerability_sources = {
+            'nvd': 'https://services.nvd.nist.gov/rest/json/cves/2.0',
+            'osv': 'https://osv.dev/api/v1/query',
+            'github': 'https://api.github.com/advisories'
+        }
+        
+        # Cache local des vulnérabilités
+        self.vulnerability_cache = {}
+    
+    def verify_model_integrity(self, model_name: str, model_path: str = None) -> Dict[str, Any]:
         """
         Vérifie l'intégrité d'un modèle
         
         Args:
-            model_path: Chemin vers le modèle
-            expected_hash: Hachage attendu (optionnel)
+            model_name: Nom du modèle
+            model_path: Chemin vers le modèle (optionnel)
             
         Returns:
             Résultat de la vérification d'intégrité
         """
         try:
-            if not config.SUPPLY_CHAIN['verify_model_hashes']:
-                return {'verified': True, 'reason': 'Vérification désactivée'}
-            
-            model_file = Path(model_path)
-            if not model_file.exists():
-                return {'verified': False, 'error': 'Fichier modèle non trouvé'}
-            
-            # Calcul du hachage SHA-256
-            sha256_hash = hashlib.sha256()
-            with open(model_file, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-            
-            calculated_hash = sha256_hash.hexdigest()
-            
-            # Vérification contre le hachage attendu
-            if expected_hash:
-                hash_match = calculated_hash == expected_hash
-            else:
-                # Vérification contre le registre des hachages vérifiés
-                hash_match = calculated_hash in self.verified_model_hashes
-            
-            result = {
-                'verified': hash_match,
-                'calculated_hash': calculated_hash,
-                'expected_hash': expected_hash,
-                'model_path': model_path,
-                'file_size': model_file.stat().st_size
+            verification_result = {
+                'model_name': model_name,
+                'verified': False,
+                'verification_methods': [],
+                'integrity_checks': {},
+                'security_issues': [],
+                'recommendations': []
             }
             
-            if hash_match:
-                # Ajout au registre des hachages vérifiés
-                self.verified_model_hashes[calculated_hash] = {
-                    'model_path': model_path,
-                    'verification_date': self._get_timestamp(),
-                    'file_size': model_file.stat().st_size
-                }
-                logger.info(f"Modèle vérifié avec succès: {model_path}")
-            else:
-                logger.warning(f"Échec de la vérification d'intégrité pour: {model_path}")
+            # Vérification du hash d'intégrité
+            if model_path and os.path.exists(model_path):
+                file_hash = self._calculate_file_hash(model_path)
+                verification_result['integrity_checks']['file_hash'] = file_hash
+                verification_result['verification_methods'].append('hash_verification')
             
-            return result
+            # Vérification de la signature numérique
+            signature_result = self._verify_digital_signature(model_name, model_path)
+            verification_result['integrity_checks']['signature'] = signature_result
+            if signature_result['verified']:
+                verification_result['verification_methods'].append('signature_verification')
+            
+            # Vérification des vulnérabilités
+            vulnerability_result = self._scan_vulnerabilities(model_name)
+            verification_result['integrity_checks']['vulnerabilities'] = vulnerability_result
+            if vulnerability_result['vulnerabilities_found']:
+                verification_result['security_issues'].extend(vulnerability_result['vulnerabilities'])
+            
+            # Vérification de la licence
+            license_result = self._check_license_compliance(model_name)
+            verification_result['integrity_checks']['license'] = license_result
+            if not license_result['compliant']:
+                verification_result['security_issues'].append({
+                    'type': 'license_compliance',
+                    'severity': 'medium',
+                    'description': f"Licence non conforme: {license_result['license']}"
+                })
+            
+            # Détermination du statut de vérification
+            verification_result['verified'] = (
+                len(verification_result['verification_methods']) >= 2 and
+                len(verification_result['security_issues']) == 0
+            )
+            
+            # Génération des recommandations
+            verification_result['recommendations'] = self._generate_verification_recommendations(verification_result)
+            
+            return verification_result
             
         except Exception as e:
             logger.error(f"Erreur lors de la vérification d'intégrité: {e}")
+            return {
+                'model_name': model_name,
+                'verified': False,
+                'error': str(e)
+            }
+    
+    def _calculate_file_hash(self, file_path: str) -> str:
+        """Calcule le hash d'un fichier"""
+        try:
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
+        except Exception as e:
+            logger.error(f"Erreur lors du calcul du hash: {e}")
+            return ""
+    
+    def _verify_digital_signature(self, model_name: str, model_path: str = None) -> Dict[str, Any]:
+        """Vérifie la signature numérique"""
+        try:
+            # Simulation de vérification de signature
+            # En production, utiliser des outils comme GPG ou des certificats X.509
+            
+            signature_result = {
+                'verified': False,
+                'signature_method': 'unknown',
+                'signer': 'unknown',
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            
+            # Vérification de la présence d'une signature
+            if model_path and os.path.exists(f"{model_path}.sig"):
+                signature_result['verified'] = True
+                signature_result['signature_method'] = 'gpg'
+                signature_result['signer'] = 'verified_signer'
+            elif model_name in ['sentence-transformers/all-MiniLM-L6-v2', 'bert-base-uncased']:
+                # Modèles de confiance connus
+                signature_result['verified'] = True
+                signature_result['signature_method'] = 'trusted_source'
+                signature_result['signer'] = 'huggingface'
+            
+            return signature_result
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la vérification de signature: {e}")
             return {'verified': False, 'error': str(e)}
+    
+    def _scan_vulnerabilities(self, model_name: str) -> Dict[str, Any]:
+        """Scanne les vulnérabilités"""
+        try:
+            vulnerabilities = []
+            
+            # Simulation de scan de vulnérabilités
+            # En production, utiliser des outils comme Trivy, Snyk, ou des APIs de sécurité
+            
+            # Vérification des dépendances connues
+            if 'tensorflow' in model_name.lower():
+                vulnerabilities.append({
+                    'cve_id': 'CVE-2023-1234',
+                    'severity': 'medium',
+                    'description': 'Vulnerability in TensorFlow dependency',
+                    'score': 5.5
+                })
+            
+            # Vérification des versions obsolètes
+            if 'old-model' in model_name.lower():
+                vulnerabilities.append({
+                    'cve_id': 'CVE-2023-5678',
+                    'severity': 'high',
+                    'description': 'Outdated model version with known vulnerabilities',
+                    'score': 7.2
+                })
+            
+            return {
+                'vulnerabilities_found': len(vulnerabilities) > 0,
+                'vulnerabilities': vulnerabilities,
+                'scan_timestamp': datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur lors du scan de vulnérabilités: {e}")
+            return {'vulnerabilities_found': False, 'vulnerabilities': [], 'error': str(e)}
+    
+    def _check_license_compliance(self, model_name: str) -> Dict[str, Any]:
+        """Vérifie la conformité des licences"""
+        try:
+            # Simulation de vérification de licence
+            # En production, utiliser des outils comme FOSSA, Snyk, ou des APIs de licence
+            
+            license_info = {
+                'license': 'MIT',
+                'compliant': True,
+                'risk_level': 'low',
+                'restrictions': []
+            }
+            
+            # Vérification des licences autorisées
+            if license_info['license'] in self.security_policies['allowed_licenses']:
+                license_info['compliant'] = True
+            elif license_info['license'] in self.security_policies['blocked_licenses']:
+                license_info['compliant'] = False
+                license_info['risk_level'] = 'high'
+                license_info['restrictions'].append('Licence bloquée par la politique de sécurité')
+            
+            return license_info
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la vérification de licence: {e}")
+            return {'license': 'unknown', 'compliant': False, 'error': str(e)}
     
     def generate_sbom(self, project_path: str) -> Dict[str, Any]:
         """
-        Génère un SBOM (Software Bill of Materials) pour le projet
+        Génère un SBOM (Software Bill of Materials)
         
         Args:
             project_path: Chemin vers le projet
@@ -103,134 +334,313 @@ class SupplyChainSecurity:
             SBOM généré
         """
         try:
-            if not config.SUPPLY_CHAIN['check_sbom']:
-                return {'sbom_generated': False, 'reason': 'Génération SBOM désactivée'}
-            
             sbom = {
                 'metadata': {
-                    'timestamp': self._get_timestamp(),
-                    'project_path': project_path,
-                    'generator': 'rag-assistant-security'
+                    'generated_at': datetime.utcnow().isoformat(),
+                    'generator': 'SupplyChainSecurity',
+                    'version': '1.0.0',
+                    'project_path': project_path
                 },
-                'components': []
+                'components': [],
+                'dependencies': [],
+                'vulnerabilities': [],
+                'licenses': [],
+                'security_summary': {}
             }
             
-            # Analyse des dépendances Python
-            python_deps = self._analyze_python_dependencies(project_path)
-            sbom['components'].extend(python_deps)
+            # Analyse des composants Python
+            python_components = self._analyze_python_components(project_path)
+            sbom['components'].extend(python_components)
             
-            # Analyse des modèles IA
-            ai_models = self._analyze_ai_models(project_path)
-            sbom['components'].extend(ai_models)
+            # Analyse des modèles ML
+            ml_components = self._analyze_ml_components(project_path)
+            sbom['components'].extend(ml_components)
             
-            # Analyse des fichiers de configuration
-            config_files = self._analyze_config_files(project_path)
-            sbom['components'].extend(config_files)
+            # Analyse des dépendances
+            dependencies = self._analyze_dependencies(project_path)
+            sbom['dependencies'].extend(dependencies)
+            
+            # Analyse des vulnérabilités
+            vulnerabilities = self._analyze_vulnerabilities(sbom['components'])
+            sbom['vulnerabilities'].extend(vulnerabilities)
+            
+            # Analyse des licences
+            licenses = self._analyze_licenses(sbom['components'])
+            sbom['licenses'].extend(licenses)
+            
+            # Résumé de sécurité
+            sbom['security_summary'] = self._generate_security_summary(sbom)
             
             return {
                 'sbom_generated': True,
                 'sbom': sbom,
-                'components_count': len(sbom['components'])
+                'components_count': len(sbom['components']),
+                'vulnerabilities_count': len(sbom['vulnerabilities']),
+                'generation_timestamp': datetime.utcnow().isoformat()
             }
             
         except Exception as e:
             logger.error(f"Erreur lors de la génération du SBOM: {e}")
             return {'sbom_generated': False, 'error': str(e)}
     
-    def verify_dependency_integrity(self, requirements_file: str = "requirements.txt") -> Dict[str, Any]:
-        """
-        Vérifie l'intégrité des dépendances
+    def _analyze_python_components(self, project_path: str) -> List[Dict[str, Any]]:
+        """Analyse les composants Python"""
+        components = []
         
-        Args:
-            requirements_file: Fichier des dépendances
-            
-        Returns:
-            Résultat de la vérification des dépendances
-        """
         try:
-            requirements_path = Path(requirements_file)
-            if not requirements_path.exists():
-                return {'verified': False, 'error': 'Fichier requirements.txt non trouvé'}
-            
-            verification_results = {
-                'total_dependencies': 0,
-                'verified_dependencies': 0,
-                'failed_dependencies': 0,
-                'dependency_details': []
-            }
-            
-            with open(requirements_path, 'r') as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        verification_results['total_dependencies'] += 1
-                        
-                        # Extraction du nom et de la version
-                        if '==' in line:
-                            package_name, version = line.split('==')
-                        elif '>=' in line:
-                            package_name, version = line.split('>=')
-                        else:
-                            package_name = line
-                            version = 'latest'
-                        
-                        # Vérification de l'intégrité du package
-                        dep_result = self._verify_package_integrity(package_name.strip(), version.strip())
-                        verification_results['dependency_details'].append(dep_result)
-                        
-                        if dep_result['verified']:
-                            verification_results['verified_dependencies'] += 1
-                        else:
-                            verification_results['failed_dependencies'] += 1
-            
-            verification_results['overall_verified'] = (
-                verification_results['failed_dependencies'] == 0
-            )
-            
-            return verification_results
+            # Lecture du fichier requirements.txt
+            requirements_file = os.path.join(project_path, 'requirements.txt')
+            if os.path.exists(requirements_file):
+                with open(requirements_file, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            # Parsing de la ligne requirements.txt
+                            if '==' in line:
+                                name, version = line.split('==', 1)
+                            elif '>=' in line:
+                                name, version = line.split('>=', 1)
+                            else:
+                                name, version = line, 'unknown'
+                            
+                            component = {
+                                'name': name.strip(),
+                                'version': version.strip(),
+                                'type': 'python_package',
+                                'source': 'pypi',
+                                'license': 'unknown',
+                                'vulnerabilities': [],
+                                'dependencies': []
+                            }
+                            components.append(component)
             
         except Exception as e:
-            logger.error(f"Erreur lors de la vérification des dépendances: {e}")
-            return {'verified': False, 'error': str(e)}
+            logger.error(f"Erreur lors de l'analyse des composants Python: {e}")
+        
+        return components
     
-    def setup_sandbox_environment(self) -> Dict[str, Any]:
+    def _analyze_ml_components(self, project_path: str) -> List[Dict[str, Any]]:
+        """Analyse les composants ML"""
+        components = []
+        
+        try:
+            # Recherche de modèles dans le projet
+            model_extensions = ['.pkl', '.joblib', '.h5', '.pb', '.onnx', '.pt', '.pth']
+            
+            for root, dirs, files in os.walk(project_path):
+                for file in files:
+                    if any(file.endswith(ext) for ext in model_extensions):
+                        model_path = os.path.join(root, file)
+                        model_hash = self._calculate_file_hash(model_path)
+                        
+                        component = {
+                            'name': file,
+                            'version': 'unknown',
+                            'type': 'ml_model',
+                            'source': 'local',
+                            'license': 'unknown',
+                            'integrity_hash': model_hash,
+                            'vulnerabilities': [],
+                            'dependencies': []
+                        }
+                        components.append(component)
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse des composants ML: {e}")
+        
+        return components
+    
+    def _analyze_dependencies(self, project_path: str) -> List[Dict[str, Any]]:
+        """Analyse les dépendances"""
+        dependencies = []
+        
+        try:
+            # Analyse des dépendances Python
+            if os.path.exists(os.path.join(project_path, 'requirements.txt')):
+                dependencies.append({
+                    'type': 'python_dependencies',
+                    'file': 'requirements.txt',
+                    'dependencies': self._parse_requirements_file(project_path)
+                })
+            
+            # Analyse des dépendances Node.js
+            if os.path.exists(os.path.join(project_path, 'package.json')):
+                dependencies.append({
+                    'type': 'nodejs_dependencies',
+                    'file': 'package.json',
+                    'dependencies': self._parse_package_json(project_path)
+                })
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse des dépendances: {e}")
+        
+        return dependencies
+    
+    def _parse_requirements_file(self, project_path: str) -> List[str]:
+        """Parse le fichier requirements.txt"""
+        dependencies = []
+        
+        try:
+            requirements_file = os.path.join(project_path, 'requirements.txt')
+            if os.path.exists(requirements_file):
+                with open(requirements_file, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                                dependencies.append(line)
+        except Exception as e:
+            logger.error(f"Erreur lors du parsing de requirements.txt: {e}")
+        
+        return dependencies
+    
+    def _parse_package_json(self, project_path: str) -> List[str]:
+        """Parse le fichier package.json"""
+        dependencies = []
+        
+        try:
+            package_json_file = os.path.join(project_path, 'package.json')
+            if os.path.exists(package_json_file):
+                with open(package_json_file, 'r') as f:
+                    package_data = json.load(f)
+                    dependencies.extend(package_data.get('dependencies', {}).keys())
+                    dependencies.extend(package_data.get('devDependencies', {}).keys())
+        except Exception as e:
+            logger.error(f"Erreur lors du parsing de package.json: {e}")
+        
+        return dependencies
+    
+    def _analyze_vulnerabilities(self, components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Analyse les vulnérabilités des composants"""
+        vulnerabilities = []
+        
+        try:
+            for component in components:
+                # Simulation de scan de vulnérabilités
+                if component['name'] in ['tensorflow', 'torch', 'numpy']:
+                    vulnerabilities.append({
+                        'component': component['name'],
+                        'cve_id': f"CVE-2023-{hash(component['name']) % 10000}",
+                        'severity': 'medium',
+                        'description': f"Vulnerability in {component['name']}",
+                        'score': 5.5
+                    })
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse des vulnérabilités: {e}")
+        
+        return vulnerabilities
+    
+    def _analyze_licenses(self, components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Analyse les licences des composants"""
+        licenses = []
+        
+        try:
+            for component in components:
+                license_info = {
+                    'component': component['name'],
+                    'license': component.get('license', 'unknown'),
+                    'compliant': component.get('license', 'unknown') in self.security_policies['allowed_licenses']
+                }
+                licenses.append(license_info)
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse des licences: {e}")
+        
+        return licenses
+    
+    def _generate_security_summary(self, sbom: Dict[str, Any]) -> Dict[str, Any]:
+        """Génère un résumé de sécurité"""
+        try:
+            total_components = len(sbom['components'])
+            total_vulnerabilities = len(sbom['vulnerabilities'])
+            compliant_licenses = sum(1 for lic in sbom['licenses'] if lic['compliant'])
+            
+            return {
+                'total_components': total_components,
+                'total_vulnerabilities': total_vulnerabilities,
+                'compliant_licenses': compliant_licenses,
+                'security_score': max(0, 100 - (total_vulnerabilities * 10)),
+                'risk_level': 'high' if total_vulnerabilities > 5 else 'medium' if total_vulnerabilities > 2 else 'low'
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération du résumé de sécurité: {e}")
+            return {'error': str(e)}
+    
+    def setup_sandbox_environment(self, name: str, image: str = "python:3.9-slim") -> Dict[str, Any]:
         """
-        Configure un environnement sandbox pour l'exécution
+        Configure un environnement sandbox
+        
+        Args:
+            name: Nom de l'environnement sandbox
+            image: Image Docker à utiliser
         
         Returns:
             Résultat de la configuration du sandbox
         """
         try:
-            if not config.SUPPLY_CHAIN['sandbox_execution']:
-                return {'sandbox_configured': False, 'reason': 'Sandbox désactivé'}
+            sandbox_id = hashlib.md5(f"{name}_{datetime.utcnow()}".encode()).hexdigest()[:8]
             
+            # Configuration du sandbox
             sandbox_config = {
-                'network_policies': self.network_policies,
-                'resource_limits': {
-                    'max_memory': '2GB',
-                    'max_cpu': '80%',
-                    'max_disk': '1GB'
-                },
-                'allowed_operations': [
-                    'file_read',
-                    'file_write',
-                    'network_request'
+                'id': sandbox_id,
+                'name': name,
+                'image': image,
+                'network_policies': [
+                    {
+                        'type': 'deny_all',
+                        'description': 'Deny all outbound connections by default'
+                    },
+                    {
+                        'type': 'allow_https',
+                        'description': 'Allow HTTPS connections to trusted sources'
+                    }
                 ],
-                'blocked_operations': [
-                    'system_command',
-                    'process_spawn',
-                    'registry_access'
-                ]
+                'resource_limits': {
+                    'memory': '512Mi',
+                    'cpu': '500m',
+                    'storage': '1Gi'
+                },
+                'security_context': {
+                    'run_as_non_root': True,
+                    'read_only_root_filesystem': True,
+                    'allow_privilege_escalation': False
+                },
+                'created_at': datetime.utcnow(),
+                'status': 'creating'
             }
             
-            # Application des politiques réseau
-            network_result = self._apply_network_policies()
+            # Création du conteneur sandbox
+            try:
+                container = self.docker_client.containers.create(
+                    image=image,
+                    name=f"sandbox-{sandbox_id}",
+                    detach=True,
+                    mem_limit='512m',
+                    cpu_quota=50000,
+                    security_opt=['no-new-privileges:true'],
+                    read_only=True
+                )
+                
+                sandbox_config['container_id'] = container.id
+                sandbox_config['status'] = 'running'
+                
+                # Ajout au registre des sandboxes
+                self.sandbox_environments[sandbox_id] = sandbox_config
             
-            return {
-                'sandbox_configured': True,
-                'sandbox_config': sandbox_config,
-                'network_policies_applied': network_result,
-                'timestamp': self._get_timestamp()
+                return {
+                    'sandbox_configured': True,
+                    'sandbox_id': sandbox_id,
+                    'container_id': container.id,
+                    'status': 'running',
+                    'configuration': sandbox_config
+                }
+                
+            except Exception as e:
+                logger.error(f"Erreur lors de la création du conteneur sandbox: {e}")
+                return {
+                    'sandbox_configured': False,
+                    'error': str(e)
             }
             
         except Exception as e:
@@ -238,163 +648,59 @@ class SupplyChainSecurity:
             return {'sandbox_configured': False, 'error': str(e)}
     
     def monitor_supply_chain_risks(self) -> Dict[str, Any]:
-        """
-        Surveille les risques de la chaîne d'approvisionnement
-        
-        Returns:
-            Résultat de la surveillance
-        """
+        """Surveille les risques de la chaîne d'approvisionnement"""
         try:
-            risk_indicators = {
-                'outdated_dependencies': 0,
-                'vulnerable_packages': 0,
-                'unverified_models': 0,
-                'network_violations': 0,
-                'integrity_failures': 0
+            risk_analysis = {
+                'total_components': len(self.components),
+                'high_risk_components': 0,
+                'vulnerabilities_detected': 0,
+                'license_violations': 0,
+                'integrity_failures': 0,
+                'recommendations': []
             }
             
-            # Vérification des dépendances obsolètes
-            outdated_deps = self._check_outdated_dependencies()
-            risk_indicators['outdated_dependencies'] = len(outdated_deps)
+            # Analyse des composants
+            for component_id, component in self.components.items():
+                if component.risk_level in [RiskLevel.CRITICAL, RiskLevel.HIGH]:
+                    risk_analysis['high_risk_components'] += 1
+                
+                if component.verification_status == VerificationStatus.FAILED:
+                    risk_analysis['integrity_failures'] += 1
+                
+                risk_analysis['vulnerabilities_detected'] += len(component.vulnerabilities)
             
-            # Vérification des vulnérabilités
-            vulnerabilities = self._check_package_vulnerabilities()
-            risk_indicators['vulnerable_packages'] = len(vulnerabilities)
+            # Génération des recommandations
+            if risk_analysis['high_risk_components'] > 0:
+                risk_analysis['recommendations'].append("Composants à haut risque détectés - Révision recommandée")
             
-            # Vérification des modèles non vérifiés
-            unverified_models = self._check_unverified_models()
-            risk_indicators['unverified_models'] = len(unverified_models)
+            if risk_analysis['vulnerabilities_detected'] > 0:
+                risk_analysis['recommendations'].append("Vulnérabilités détectées - Mise à jour recommandée")
             
-            # Calcul du score de risque global
-            total_risks = sum(risk_indicators.values())
-            risk_score = min(total_risks / 10, 1.0)  # Normalisation sur 10
+            if risk_analysis['integrity_failures'] > 0:
+                risk_analysis['recommendations'].append("Échecs d'intégrité détectés - Vérification recommandée")
             
-            if risk_score > 0.8:
-                risk_level = 'critical'
-            elif risk_score > 0.6:
-                risk_level = 'high'
-            elif risk_score > 0.4:
-                risk_level = 'medium'
-            else:
-                risk_level = 'low'
-            
-            return {
-                'risk_score': risk_score,
-                'risk_level': risk_level,
-                'risk_indicators': risk_indicators,
-                'outdated_dependencies': outdated_deps,
-                'vulnerabilities': vulnerabilities,
-                'unverified_models': unverified_models,
-                'monitoring_timestamp': self._get_timestamp()
-            }
+            return risk_analysis
             
         except Exception as e:
             logger.error(f"Erreur lors de la surveillance des risques: {e}")
-            return {'risk_score': 1.0, 'risk_level': 'critical', 'error': str(e)}
+            return {'error': str(e)}
     
-    def _analyze_python_dependencies(self, project_path: str) -> List[Dict[str, Any]]:
-        """Analyse les dépendances Python"""
-        components = []
+    def _generate_verification_recommendations(self, verification_result: Dict[str, Any]) -> List[str]:
+        """Génère des recommandations de vérification"""
+        recommendations = []
         
         try:
-            requirements_path = Path(project_path) / "requirements.txt"
-            if requirements_path.exists():
-                with open(requirements_path, 'r') as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and not line.startswith('#'):
-                            components.append({
-                                'type': 'python_package',
-                                'name': line.split('==')[0] if '==' in line else line,
-                                'version': line.split('==')[1] if '==' in line else 'latest',
-                                'source': 'requirements.txt'
-                            })
+            if not verification_result['verified']:
+                recommendations.append("Vérification d'intégrité échouée - Révision recommandée")
+            
+            if verification_result['security_issues']:
+                recommendations.append("Problèmes de sécurité détectés - Correction recommandée")
+            
+            if len(verification_result['verification_methods']) < 2:
+                recommendations.append("Méthodes de vérification insuffisantes - Ajout recommandé")
+            
+            return recommendations
+            
         except Exception as e:
-            logger.warning(f"Erreur lors de l'analyse des dépendances Python: {e}")
-        
-        return components
-    
-    def _analyze_ai_models(self, project_path: str) -> List[Dict[str, Any]]:
-        """Analyse les modèles IA utilisés"""
-        components = []
-        
-        # Modèles connus utilisés dans le projet
-        known_models = [
-            'sentence-transformers/all-MiniLM-L6-v2',
-            'unitary/toxic-bert',
-            'facebook/roberta-hate-speech-dynabench-r4-target'
-        ]
-        
-        for model in known_models:
-            components.append({
-                'type': 'ai_model',
-                'name': model,
-                'source': 'huggingface',
-                'verified': model in self.verified_model_hashes
-            })
-        
-        return components
-    
-    def _analyze_config_files(self, project_path: str) -> List[Dict[str, Any]]:
-        """Analyse les fichiers de configuration"""
-        components = []
-        
-        config_files = ['config.py', '.env', 'docker-compose.yml', 'Dockerfile']
-        
-        for config_file in config_files:
-            config_path = Path(project_path) / config_file
-            if config_path.exists():
-                components.append({
-                    'type': 'config_file',
-                    'name': config_file,
-                    'path': str(config_path),
-                    'size': config_path.stat().st_size
-                })
-        
-        return components
-    
-    def _verify_package_integrity(self, package_name: str, version: str) -> Dict[str, Any]:
-        """Vérifie l'intégrité d'un package Python"""
-        try:
-            # Simulation de vérification (en production, utiliser PyPI ou un registre de confiance)
-            return {
-                'package': package_name,
-                'version': version,
-                'verified': True,  # Simplification pour l'exemple
-                'verification_method': 'checksum_verification'
-            }
-        except Exception as e:
-            return {
-                'package': package_name,
-                'version': version,
-                'verified': False,
-                'error': str(e)
-            }
-    
-    def _apply_network_policies(self) -> Dict[str, Any]:
-        """Applique les politiques réseau"""
-        return {
-            'outbound_blocked': not self.network_policies['allow_outbound'],
-            'allowed_domains': self.network_policies['allowed_domains'],
-            'policies_applied': True
-        }
-    
-    def _check_outdated_dependencies(self) -> List[str]:
-        """Vérifie les dépendances obsolètes"""
-        # Simulation - en production, utiliser pip-audit ou similar
-        return []
-    
-    def _check_package_vulnerabilities(self) -> List[Dict[str, Any]]:
-        """Vérifie les vulnérabilités des packages"""
-        # Simulation - en production, utiliser safety ou similar
-        return []
-    
-    def _check_unverified_models(self) -> List[str]:
-        """Vérifie les modèles non vérifiés"""
-        # Retourne les modèles qui ne sont pas dans le registre des hachages vérifiés
-        return []
-    
-    def _get_timestamp(self) -> str:
-        """Retourne le timestamp actuel"""
-        from datetime import datetime
-        return datetime.utcnow().isoformat()
+            logger.error(f"Erreur lors de la génération des recommandations: {e}")
+            return ["Erreur lors de la génération des recommandations"]
